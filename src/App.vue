@@ -39,55 +39,33 @@
 			}
 		},
 		mounted () {
-			let $this = this
+			// let $this = this
 			let date_format = 'MMM D, YY'			
 				
 			let now = moment("tuesday").format(date_format)
 			console.log(now)
 
-			// let parameters_str = window.location.search
-			// parameters_str = parameters_str.split('?')[1]
-			// this.url = parameters_str.split("url=")[1]
-			// console.log(this.url)
+			let parameters_str = window.location.search
+			parameters_str = parameters_str.split('?')[1]
+			this.url = parameters_str.split("url=")[1]
+			console.log(this.url)
 
-			// this.getData()			
+			this.getData()			
 			
-			this.ws()
-
-			setInterval(function(){				
-				$this.getData()
-			}, 15000)			
+			this.ws()				
 		},
 		methods: {
-			getData() {		
-				// this.percentage = 0
-				// this.percentage_remaining = 0		
-				// let $this = this				
-				// setTimeout(function(){						
-				// 	$this.end_date = "data.to_go"
-				// 	$this.current = 3
-				// 	$this.goal = 4
-				// 	$this.percentage = (($this.current/$this.goal)*100).toFixed(2)
-				// 	$this.remaining =$this.goal - $this.current					
-				// 	$this.percentage_remaining = (100 - $this.percentage) - 4
-				// }, 1000)				
-				if(this.url) {
-					axios
-					.get(this.url)
-					.then(response => {
-						let $this = this
-						setTimeout(function(){
-							let data = response.data.data
-							$this.end_date = data.to_go
-							$this.current = data.amount.current
-							$this.goal = data.amount.target
-							$this.percentage = (($this.current/$this.goal)*100).toFixed(2)
-							$this.remaining = $this.goal - $this.current					
-							$this.percentage_remaining = (100 - $this.percentage) - 4
-							$this.ticker(0, $this.percentage)
-						}, 1000)
-					})				
-				}
+			getData() {			
+				axios
+				.get(this.url)
+				.then(response => {
+					let $this = this
+					setTimeout(function(){
+						let data = response.data						
+						$this.current = data.current
+						$this.goal = data.goal						
+					}, 1000)
+				})								
 			},
 			ticker(current, max) {			
 				let $this = this
@@ -110,21 +88,33 @@
 						console.log('reloading')
 						location.reload()
 					}
-				}, 1000)
+				}, 5000)
 
 
 				this.connection.onmessage = function(event) {
-					console.log(event.data);									
+					let data = JSON.parse(event.data)
+					$this.current = data.current
+					$this.goal = data.goal
+					console.log(data)
 				}
 
 				this.connection.onopen = function() {				
 					console.log("Successfully connected to monty websocket server...")
 				}
+			},
+			update_percentage: function () {
+				this.percentage = ((this.current/this.goal)*100).toFixed(2)
+				this.remaining = this.goal - this.current					
+				this.percentage_remaining = (100 - this.percentage) - 4
+				this.ticker(0, this.percentage)
 			}
 		},
 		watch: {
-			percentage() {				
-				this.inc(20)
+			current() {
+				this.update_percentage()
+			},
+			goal() {
+				this.update_percentage()
 			}
 		}
 	}
