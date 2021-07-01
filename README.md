@@ -1,5 +1,8 @@
 # twitch_followers
 
+Usage:
+1. Enter URL https://jandae.github.io/follower-widget?url=<server init>
+
 ## Project setup
 ```
 npm install
