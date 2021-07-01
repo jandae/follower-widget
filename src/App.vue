@@ -1,14 +1,14 @@
 <template>
 	<div id="app">
-		<div class="bar-wrap">
+		<div class="bar-wrap">			
 			<div class="bar" :style="`width: ${percentage}%`">
 				<div class="left">
 					<span class="number">{{current}}</span>
 					<span>Followers</span>
 				</div>
-				<span class="right number">{{ticker_percentage}}%</span>				
+				<span class="right number" v-bind:class="{ over: (percentage > 94) }">{{ticker_percentage}}%</span>				
 			</div>	 		
-			<div class="remaining" :style="`width: ${percentage_remaining}%`">
+			<div class="remaining" :style="`width: ${percentage_remaining}%`" v-bind:class="{ over: (percentage_remaining < 9), fadeIn: (remaining > 0) }">
 				<span class="number">{{remaining}}</span>
 				<span>to go!</span>
 			</div>
@@ -33,13 +33,13 @@
 				goal: 0,
 				percentage: 0,
 				remaining: 0,
-				percentage_remaining: 0,			
+				percentage_remaining: 100,			
 				ticker_percentage: 0,
 				url: null
 			}
 		},
 		mounted () {
-			// let $this = this
+			let $this = this
 			let date_format = 'MMM D, YY'			
 				
 			let now = moment("tuesday").format(date_format)
@@ -50,12 +50,21 @@
 			this.url = parameters_str.split("url=")[1]
 			console.log(this.url)
 
-			this.getData()			
+			this.getData()	
+			setInterval(function(){
+				$this.getData()			
+			}, 9000)
 			
 			this.ws()				
 		},
 		methods: {
 			getData() {			
+				this.percentage_remaining = 0
+				this.percentage = 0
+				this.current = 0
+				this.goal = 0
+				
+
 				axios
 				.get(this.url)
 				.then(response => {
@@ -64,7 +73,7 @@
 						let data = response.data						
 						$this.current = data.current
 						$this.goal = data.goal						
-					}, 1000)
+					}, 2000)
 				})								
 			},
 			ticker(current, max) {			
@@ -103,10 +112,21 @@
 				}
 			},
 			update_percentage: function () {
-				this.percentage = ((this.current/this.goal)*100).toFixed(2)
-				this.remaining = this.goal - this.current					
-				this.percentage_remaining = (100 - this.percentage) - 4
-				this.ticker(0, this.percentage)
+				let percent = parseFloat(((this.current/this.goal)*100))	
+				console.log(typeof percent)		
+				if(!Number.isNaN(percent)){
+					this.percentage = percent.toFixed(2)	
+					this.remaining = this.goal - this.current					
+					this.percentage_remaining = (100 - this.percentage) - 4
+					this.ticker(0, this.percentage)
+				} else {
+					this.current = 0
+					this.goal = 0
+					this.percentage = 0
+					this.percentage_remaining = 100		
+					this.ticker_percentage = 0								
+				}
+
 			}
 		},
 		watch: {
@@ -160,9 +180,10 @@
 		height: 100%;
 		display: flex;
 		align-items: center;	
-		transition: width 2s;
+		transition: width 2s ease-in-out, opacity 2s ease-in-out;
 		overflow: visible;
 		z-index: 1;
+		opacity: 0;
 
 		box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
 		transform: scale(1);
@@ -170,6 +191,15 @@
 
 		span {
 			margin-right: 5px;
+		}
+
+		&.over {
+			width: 100%!important;
+			justify-content: center;
+		}
+
+		&.fadeIn {
+			opacity: 1;
 		}
 	}
 }
@@ -198,6 +228,12 @@
 			margin-right: 5px;
 		}
 	}		
+
+	.right {
+		&.over {
+			padding-right: 6%;
+		}
+	}
 }
 
 
