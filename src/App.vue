@@ -8,7 +8,7 @@
 				</div>
 				<span class="right number" v-bind:class="{ over: (percentage > 94) }">{{ticker_percentage}}%</span>				
 			</div>	 		
-			<div class="remaining" :style="`width: ${percentage_remaining}%`" v-bind:class="{ over: (percentage_remaining < 9), fadeIn: (remaining > 0) }">
+			<div class="remaining" :style="`width: ${percentage_remaining}%`" v-bind:class="{ over: (percentage_remaining < 9), fadeIn: (percentage_remaining < 50), fadeOut: (percentage_remaining == 100) }">
 				<span class="number">{{remaining}}</span>
 				<span>to go!</span>
 			</div>
@@ -122,8 +122,8 @@
 				} else {
 					this.current = 0
 					this.goal = 0
-					this.percentage = 0
-					this.percentage_remaining = 100		
+					this.percentage = 20
+					this.percentage_remaining = 80		
 					this.ticker_percentage = 0								
 				}
 
@@ -200,6 +200,10 @@
 
 		&.fadeIn {
 			opacity: 1;
+		}
+
+		&.fadeOut {
+			opacity: 0;
 		}
 	}
 }
