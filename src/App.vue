@@ -59,10 +59,11 @@
 		},
 		methods: {
 			getData() {			
-				this.percentage_remaining = 0
-				this.percentage = 0
-				this.current = 0
-				this.goal = 0
+				this.tickerDown(this.percentage, 0)
+				this.percentage_remaining = 80
+				this.percentage = 20
+				// this.current = 0
+				// this.goal = 0
 				
 
 				axios
@@ -72,15 +73,28 @@
 					setTimeout(function(){
 						let data = response.data						
 						$this.current = data.current
-						$this.goal = data.goal						
+						$this.goal = data.goal			
+						$this.update_percentage()			
 					}, 2000)
 				})								
 			},
-			ticker(current, max) {			
-				let $this = this
+			tickerUp(current, max) {			
+				let $this = this				
+
 				let timer = setInterval(function(){
 					if (current <= max) {
 						$this.ticker_percentage = current++
+					} else {
+						clearTimeout(timer)
+					}
+				}, 20)
+			},
+			tickerDown(current, max) {			
+				let $this = this				
+
+				let timer = setInterval(function(){
+					if (current >= max) {
+						$this.ticker_percentage = current--
 					} else {
 						clearTimeout(timer)
 					}
@@ -118,10 +132,10 @@
 					this.percentage = percent.toFixed(2)	
 					this.remaining = this.goal - this.current					
 					this.percentage_remaining = (100 - this.percentage) - 4
-					this.ticker(0, this.percentage)
+					this.tickerUp(0, this.percentage)
 				} else {
-					this.current = 0
-					this.goal = 0
+					// this.current = 0
+					// this.goal = 0
 					this.percentage = 20
 					this.percentage_remaining = 80		
 					this.ticker_percentage = 0								
