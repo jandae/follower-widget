@@ -40,7 +40,7 @@
 				remaining: 0,
 				percentage_remaining: 100,			
 				ticker_percentage: 0,
-				url: "https://192.168.100.91:1880/follower/goal/data"
+				url: "https://192.168.100.91:9088/follower/goal/data"
 			}
 		},
 		mounted () {
